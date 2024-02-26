@@ -4,7 +4,7 @@ import Header from '../../Esquema/Header.js';
 import Footer from '../../Esquema/Footer';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import { baseURL, fetchData } from '../../api.js';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 const Registro = () => {
   const [nombre, setNombre] = useState('');
@@ -14,13 +14,210 @@ const Registro = () => {
   const [segundoApellido, setSegundoApellido] = useState('');
   const [segundoApellidoError, setSegundoApellidoError] = useState('');
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [confirmarContrasena, setConfirmarContrasena] = useState('');
   const [alerta, setAlerta] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState([]);
+  const [contrasenaError, setContrasenaError] = useState('');
+  const [contrasenaFuerza, setContrasenaFuerza] = useState('');
+  const [mostrarConfirmarContrasena, setMostrarConfirmarContrasena] = useState(false);
+  const [terminosAceptados, setTerminosAceptados] = useState(false);
+
   const navigate = useNavigate();
   const captcha = useRef(null);
+
+  const handleNombreChange = (e) => {
+    const inputValue = e.target.value;
+    setNombre(inputValue);
+    if (primerApellidoError || segundoApellidoError) {
+      validarApellido(primerApellido, "Apellido Paterno", setPrimerApellidoError);
+      validarApellido(segundoApellido, "Apellido Materno", setSegundoApellidoError);
+    } else {
+      const validacionNombre = validarNombre(inputValue);
+      if (validacionNombre) {
+        setAlerta(null);
+      }
+    }
+  };
+
+  const handlePrimerApellidoChange = (e) => {
+    const inputValue = e.target.value;
+    setPrimerApellido(inputValue);
+    const validacionApellido = validarApellido(inputValue, "Apellido Paterno", setPrimerApellidoError);
+    if (validacionApellido) {
+      setAlerta(null);
+    }
+  };
+
+  const handleSegundoApellidoChange = (e) => {
+    const inputValue = e.target.value;
+    setSegundoApellido(inputValue);
+    const validacionApellido = validarApellido(inputValue, "Apellido Materno", setSegundoApellidoError);
+    if (validacionApellido) {
+      setAlerta(null);
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const inputValue = e.target.value;
+    setEmail(inputValue);
+    if (!nombreError && !primerApellidoError && !segundoApellidoError) {
+      if (!validarCorreoElectronico(inputValue)) {
+        setEmailError('¡Ingrese una dirección de correo electrónico válida!');
+      } else {
+        setEmailError('');
+      }
+    }
+  };
+
+  const handleContrasenaChange = (e) => {
+    const inputValue = e.target.value;
+    setContrasena(inputValue);
+
+    const errors = validarContrasena(inputValue, confirmarContrasena);
+    setPasswordErrors(errors);
+
+    const passwordErrorsFiltered = errors.filter(error => !error.includes('Las contraseñas no coinciden'));
+
+    const fuerza = calcularFuerzaContrasena(passwordErrorsFiltered);
+    setContrasenaFuerza(fuerza);
+
+    if (passwordErrorsFiltered.length === 0) {
+      setContrasenaError([]);
+      if (fuerza === 'Fuerte') {
+        setMostrarConfirmarContrasena(true);
+      } else {
+        setMostrarConfirmarContrasena(false);
+      }
+    } else {
+      setContrasenaError(passwordErrorsFiltered);
+      setMostrarConfirmarContrasena(false);
+    }
+  };
+
+  const handleConfirmarContrasenaChange = (e) => {
+    const inputValue = e.target.value;
+    setConfirmarContrasena(inputValue);
+    const errors = validarContrasena(contrasena, inputValue);
+    setPasswordErrors(errors);
+    setContrasenaError('');
+  };
+
+  const handleTerminosChange = (e) => {
+    setTerminosAceptados(e.target.checked);
+  };
+
+  const handleRegistro = async (event) => {
+    event.preventDefault();
+
+    if (
+      nombre.trim() === '' ||
+      primerApellido.trim() === '' ||
+      segundoApellido.trim() === '' ||
+      email.trim() === '' ||
+      contrasena === '' ||
+      confirmarContrasena === ''
+    ) {
+      setAlerta('Por favor completa todos los campos.');
+      return;
+    }
+    const nombreValido = validarNombre(nombre);
+    const apellidoPaternoValido = validarApellido(primerApellido, "Apellido Paterno", setPrimerApellidoError);
+    const apellidoMaternoValido = validarApellido(segundoApellido, "Apellido Materno", setSegundoApellidoError);
+
+    if (!nombreValido || !apellidoPaternoValido || !apellidoMaternoValido) {
+      setAlerta('Por favor completa y verifica los campos marcados.');
+      return;
+    }
+    if (!validarCorreoElectronico(email)) {
+      setAlerta('Por favor ingrese una dirección de correo electrónico válida.');
+      return;
+    }
+
+    if (passwordErrors.length > 0) {
+      setAlerta(passwordErrors.join(' '));
+      return;
+    }
+
+    if (!terminosAceptados) {
+      setAlerta('Debe aceptar los términos y condiciones.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://api-rest-sport.vercel.app/api/users123/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre,
+          primerApellido,
+          segundoApellido,
+          correoElectronico: email,
+          contrasena,
+        }),
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          title: "Exito",
+          text: "Usuario registrado exitosamente",
+          icon: "success",
+          confirmButtonText: "Cerrar",
+        });
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        setAlerta(errorData.msg);
+      }
+    } catch (error) {
+      setAlerta('Error al crear usuario. Por favor, intenta nuevamente.');
+    }
+  };
+
+  const validarCorreoElectronico = (correo) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(correo).toLowerCase());
+  };
+
+  const validarContrasena = (password, confirmation) => {
+    const mayusculas = /[A-Z]/;
+    const minusculas = /[a-z]/;
+    const numeros = /\d/;
+    const caracteres = /[!@#$%^&*()\-_=+{};:,<.>]/;
+
+    const errors = [];
+
+    if (password.length < 8) {
+      errors.push("- La contraseña debe tener al menos 8 caracteres.");
+    }
+
+    if (!mayusculas.test(password)) {
+      errors.push("- La contraseña debe tener al menos una letra mayúscula.");
+    }
+
+    if (!minusculas.test(password)) {
+      errors.push("- La contraseña debe tener al menos una letra minúscula.");
+    }
+
+    if (!numeros.test(password)) {
+      errors.push("- La contraseña debe tener al menos un número.");
+    }
+
+    if (!caracteres.test(password)) {
+      errors.push("- La contraseña debe tener al menos un carácter especial.");
+    }
+
+    if (password !== confirmation) {
+      errors.push("- Las contraseñas no coinciden.");
+    }
+
+    return errors;
+  };
 
   const validarNombre = (value) => {
     if (!value.trim()) {
@@ -54,145 +251,31 @@ const Registro = () => {
     }
   };
 
-  const handleNombreChange = (e) => {
-    const inputValue = e.target.value;
-    setNombre(inputValue);
-    if (primerApellidoError || segundoApellidoError) {
-      validarApellido(primerApellido, "Apellido Paterno", setPrimerApellidoError);
-      validarApellido(segundoApellido, "Apellido Materno", setSegundoApellidoError);
+  const calcularFuerzaContrasena = (errors) => {
+    if (errors.length === 0) {
+      return 'Fuerte';
+    } else if (errors.length <= 2) {
+      return 'Medio';
     } else {
-      const validacionNombre = validarNombre(inputValue);
-      if (validacionNombre) {
-        setAlerta(null); // Limpiar la alerta si la validación del nombre es exitosa
-      }
-    }
-  };
-  
-  const handlePrimerApellidoChange = (e) => {
-    const inputValue = e.target.value;
-    setPrimerApellido(inputValue);
-    const validacionApellido = validarApellido(inputValue, "Apellido Paterno", setPrimerApellidoError);
-    if (validacionApellido) {
-      setAlerta(null); // Limpiar la alerta si la validación del apellido paterno es exitosa
-    }
-  };
-  
-  const handleSegundoApellidoChange = (e) => {
-    const inputValue = e.target.value;
-    setSegundoApellido(inputValue);
-    const validacionApellido = validarApellido(inputValue, "Apellido Materno", setSegundoApellidoError);
-    if (validacionApellido) {
-      setAlerta(null); // Limpiar la alerta si la validación del apellido materno es exitosa
+      return 'Débil';
     }
   };
 
-  const validarCorreoElectronico = (correo) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(correo).toLowerCase());
-  };
-
-  const validacionesContraseña = (password, confirmacion) => {
-    const mayusculas = /[A-Z]/;
-    const minusculas = /[a-z]/;
-    const numeros = /\d/;
-    const caracteres = /[!@#$%^&*()\-_=+{};:,<.>]/;
-
-    const errors = [];
-
-    if (!mayusculas.test(password)) {
-      errors.push("La contraseña debe tener al menos una letra mayúscula.");
-    }
-
-    if (!minusculas.test(password)) {
-      errors.push("La contraseña debe tener al menos una letra minúscula.");
-    }
-
-    if (!numeros.test(password)) {
-      errors.push("La contraseña debe tener al menos un número.");
-    }
-
-    if (!caracteres.test(password)) {
-      errors.push("La contraseña debe tener al menos un carácter especial.");
-    }
-
-    if (password !== confirmacion) {
-      errors.push("Las contraseñas no coinciden.");
-    }
-
-    return errors;
-  };
-
-  const handleRegistro = async (event) => {
-    event.preventDefault();
-
-    // console.log("Registrando usuario...");
-
-    if (
-      nombre.trim() === '' ||
-      primerApellido.trim() === '' ||
-      segundoApellido.trim() === '' ||
-      email.trim() === '' ||
-      contrasena === '' ||
-      confirmarContrasena === ''
-    ) {
-      // console.log("Faltan campos por completar");
-      setAlerta('Por favor completa todos los campos.');
-      return;
-    }
-    const nombreValido = validarNombre(nombre);
-    const apellidoPaternoValido = validarApellido(primerApellido, "Apellido Paterno", setPrimerApellidoError);
-    const apellidoMaternoValido = validarApellido(segundoApellido, "Apellido Materno", setSegundoApellidoError);
-
-    if (!nombreValido || !apellidoPaternoValido || !apellidoMaternoValido) {
-      // Si alguna de las validaciones no pasa, mostrar alerta y detener el registro
-      setAlerta('Por favor completa y verifica los campos marcados.');
-      return;
-    }
-    if (!validarCorreoElectronico(email)) {
-      setAlerta('Por favor ingrese una dirección de correo electrónico válida.');
-      return;
-    }
-
-    const passwordErrors = validacionesContraseña(contrasena, confirmarContrasena);
-    if (passwordErrors.length > 0) {
-      setAlerta(passwordErrors.join(' '));
-      return;
-    }
-
-    // console.log("Realizando solicitud de registro...");
-    try {
-      // const response = await fetch('http://localhost:3001/api/users/', {
-      const response = await fetchData(`${baseURL}/users/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre,
-          primerApellido,
-          segundoApellido,
-          correoElectronico: email,
-          contrasena,
-        }),
-      });
-
-      if (response.ok) {
-        Swal.fire({
-          title: "Exito",
-          text: "Usuario registrado exitosamente",
-          icon: "success",
-          confirmButtonText: "Cerrar",
-        });
-        navigate('/login');
-      } else {
-        // console.log("Error al registrar usuario");
-        const errorData = await response.json();
-        setAlerta(errorData.msg);
-      }
-    } catch (error) {
-      // console.error('Error al crear usuario:', error);
-      setAlerta('Error al crear usuario. Por favor, intenta nuevamente.');
-    }
+  const isFormValid = () => {
+    return (
+      nombre.trim() !== '' &&
+      primerApellido.trim() !== '' &&
+      segundoApellido.trim() !== '' &&
+      email.trim() !== '' &&
+      contrasena !== '' &&
+      confirmarContrasena !== '' &&
+      nombreError === '' &&
+      primerApellidoError === '' &&
+      segundoApellidoError === '' &&
+      emailError === '' &&
+      contrasenaError.length === 0 &&
+      terminosAceptados
+    );
   };
 
   return (
@@ -212,46 +295,76 @@ const Registro = () => {
                     <form onSubmit={handleRegistro} className="row g-3 needs-validation" noValidate>
                       <div className="col-12">
                         <label htmlFor="yourName" className="form-label">Nombre</label>
-                        <input type="text" name="name" className={`form-control ${nombreError ? 'is-invalid' : ''}`} id="yourName" required value={nombre} onChange={handleNombreChange} />
+                        <input type="text" placeholder="Ingresa tu nombre" name="name" className={`form-control ${nombreError ? 'is-invalid' : ''}`} id="yourName" required value={nombre} onChange={handleNombreChange} />
                         {nombreError && <div className="invalid-feedback">{nombreError}</div>}
                       </div>
                       <div className="col-12">
                         <label htmlFor="yourApePat" className="form-label">Apellido Paterno</label>
-                        <input type="text" name="ApePat" className={`form-control ${primerApellidoError ? 'is-invalid' : ''}`} id="ApePat" required value={primerApellido} onChange={handlePrimerApellidoChange} />
+                        <input type="text" placeholder='Ingresa tu apellido' name="ApePat" className={`form-control ${primerApellidoError ? 'is-invalid' : ''}`} id="ApePat" required value={primerApellido} onChange={handlePrimerApellidoChange} />
                         {primerApellidoError && <div className="invalid-feedback">{primerApellidoError}</div>}
                       </div>
                       <div className="col-12">
                         <label htmlFor="yourApeMat" className="form-label">Apellido Materno</label>
-                        <input type="text" name="ApeMat" className={`form-control ${segundoApellidoError ? 'is-invalid' : ''}`} id="ApeMat" required value={segundoApellido} onChange={handleSegundoApellidoChange} />
+                        <input type="text" name="ApeMat" placeholder='Ingresa tu apellido' className={`form-control ${segundoApellidoError ? 'is-invalid' : ''}`} id="ApeMat" required value={segundoApellido} onChange={handleSegundoApellidoChange} />
                         {segundoApellidoError && <div className="invalid-feedback">{segundoApellidoError}</div>}
                       </div>
                       <div className="col-12">
                         <label htmlFor="yourEmail" className="form-label">Correo Electrónico</label>
-                        <input type="email" name="email" className="form-control" id="yourEmail" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <div className="invalid-feedback">¡Ingrese una dirección de correo electrónico válida!</div>
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="Ingresa tu correo"
+                          className={`form-control ${emailError ? 'is-invalid' : ''}`}
+                          id="yourEmail"
+                          required
+                          value={email}
+                          onChange={handleEmailChange}
+                        />
+                        {emailError &&
+                          <div className="invalid-feedback">¡Ingrese una dirección de correo electrónico válida!
+                          </div>}
                       </div>
                       <div className="col-12">
                         <label htmlFor="yourPassword" className="form-label">Contraseña</label>
                         <div className="input-group">
-                          <input type={showPassword ? "text" : "password"} name="password" className="form-control" id="yourPassword" required value={contrasena} onChange={(e) => setContrasena(e.target.value)} />
+                          <input type={showPassword ? "text" : "password"} placeholder='Ingresa contraseña' name="password" className={`form-control ${passwordErrors.length > 0}`} id="yourPassword" required value={contrasena} onChange={handleContrasenaChange} />
                           <button className="btn btn-outline-secondary" type="button" onClick={() => setShowPassword(!showPassword)}>
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                           </button>
+                          {contrasenaError.length > 0 && (
+                            <div>
+                              <div className="alert alert-danger">
+                                {contrasenaError.map((error, index) => (
+                                  <div key={index}>{error}</div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="invalid-feedback">¡Por favor, introduzca su contraseña!</div>
                       </div>
-                      <div className="col-12">
-                        <label htmlFor="yourPasswordConfirm" className="form-label">Confirmar Contraseña</label>
-                        <div className="input-group">
-                          <input type={showConfirmPassword ? "text" : "password"} name="PasswordConfirm" className="form-control" id="PasswordConfirm" required value={confirmarContrasena} onChange={(e) => setConfirmarContrasena(e.target.value)} />
-                          <button className="btn btn-outline-secondary" type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                          </button>
+                      <ProgressBar now={contrasenaFuerza === 'Débil' ? 25 : contrasenaFuerza === 'Medio' ? 50 : contrasenaFuerza === 'Fuerte' ? 100 : 0} label={contrasenaFuerza} />
+                      {mostrarConfirmarContrasena && (
+                        <div className="col-12">
+                          <label htmlFor="yourPasswordConfirm" className="form-label">Confirmar Contraseña</label>
+                          <div className="input-group">
+                            <input type={showConfirmPassword ? "text" : "password"} placeholder='Confirma contraseña' name="PasswordConfirm" className={`form-control ${passwordErrors.length > 0}`} id="PasswordConfirm" required value={confirmarContrasena} onChange={handleConfirmarContrasenaChange} />
+                            <button className="btn btn-outline-secondary" type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                          </div>
+                          {passwordErrors.map((error, index) => (
+                            <div key={index} className="invalid-feedback">{error}</div>
+                          ))}
                         </div>
-                        <div className="invalid-feedback">¡Por favor, introduzca su contraseña!</div>
+                      )}
+
+                      <div className="col-12 form-check">
+                        <input type="checkbox" className="form-check-input" id="terminosCheck" checked={terminosAceptados} onChange={handleTerminosChange} />
+                        <label className="form-check-label" htmlFor="terminosCheck">Acepto los <Link to="/terminos-y-condiciones">términos y condiciones</Link></label>
                       </div>
+
                       <div className="col-12">
-                        <button className="btn btn-primary w-100" type="submit">Crear una cuenta</button>
+                        <button className="btn btn-primary w-100" type="submit" disabled={!isFormValid()}>Crear una cuenta</button>
                       </div>
                       {alerta && (
                         <div className="col-12 mt-2">

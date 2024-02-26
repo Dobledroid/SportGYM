@@ -1,22 +1,14 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from "../../Esquema/Header.js";
 import Footer from "../../Esquema/Footer";
 import IconUsuario from "./assets/username-icon.svg";
 import IconPassword from "./assets/password-icon.svg";
-import IconGoogle from "./assets/google-icon.svg";
-import IconFacebook from "./assets/facebook-svgrepo-com.svg";
-import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from 'react';
-// import './Login.css';
-
-
-import Alert from '../Validaciones/Alerts/Alert.js';
-
-
 import { GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
-
 import { auth } from "./firebase.js";
-import { baseURL } from '../../api.js';
-
+import Alert from '../Validaciones/Alerts/Alert.js';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importa los iconos FaEye y FaEyeSlash
+import './Login.css';
 
 const Login = () => {
   const [correo, setCorreo] = useState('');
@@ -34,45 +26,10 @@ const Login = () => {
   const toggleMostrarContrasena = () => {
     setMostrarContrasena(!mostrarContrasena);
   };
+
   const closeAlert = () => {
     setAlert(null);
   };
-
-  const handleGoogle = async (event) => {
-    const provider = new GoogleAuthProvider()
-    try {
-      const credentials = await signInWithPopup(auth, provider)
-      // console.log(credentials.user)
-      const data = credentials.user;
-      // console.log(data)
-      const user = { usuario: data.displayName, correo: data.email, id: data._id, tipo: data.typeUser, foto: data.photoURL };
-      // console.log(user)
-      setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', true);
-      localStorage.setItem('user', JSON.stringify(user));
-      navigate('/error', { state: user })
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const handleFacebook = async (event) => {
-    const provider = new FacebookAuthProvider()
-    try {
-      const credentials = await signInWithPopup(auth, provider)
-      // console.log(credentials.user)
-      const data = credentials.user;
-      // console.log(data)
-      const user = { usuario: data.displayName, correo: data.email, id: data._id, tipo: data.typeUser, foto: data.photoURL };
-      // console.log(user)
-      setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', true);
-      localStorage.setItem('user', JSON.stringify(user));
-      navigate('/panel', { state: user })
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   const handleLogin = async (event) => {
     // Validación de campos vacíos
@@ -83,14 +40,14 @@ const Login = () => {
         return;
       }
       // const response = await fetch('http://localhost:3010/api/users/login', {
-        const response = await fetch(`${baseURL}/users/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ correoElectronico: correo, contraseña: password }),
-        });
-      console.log("response", response)
+      const response = await fetch('https://api-rest-sport.vercel.app/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ correoElectronico: correo, contraseña: password }),
+      });
+      // console.log(response)
       if (!response.ok) {
         const errorData = await response.json();
         console.log(errorData)
@@ -99,7 +56,7 @@ const Login = () => {
       }
 
       const userData = await response.json();
-      // console.log("userData", userData)
+      // console.log(userData)
 
       // sessionStorage.setItem('userData', JSON.stringify(userData));
 
@@ -119,34 +76,28 @@ const Login = () => {
 
   return (
     <div>
-      <Header />
-      <div class="container">
-
-        <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-          <div class="container">
-            <div class="row justify-content-center">
-              <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-
-                <div class="card mb-3">
-
-                  <div class="card-body">
-
-                    <div class="pt-4 pb-2">
-                      <h5 class="card-title text-center pb-0 fs-4">Iniciar sesión</h5>
-                      <p class="text-center small">Ingrese su nombre de usuario y contraseña para iniciar sesión</p>
+      <Header className="pt-0" />
+      <div className="container">
+        <section className="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-0">
+          <div className="container mt-0 mb-0">
+            <div className="row justify-content-center">
+              <div className="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+                <div className="card mb-0">
+                  <div className="card-body">
+                    <div className="pt-0 pb-0">
+                      <h5 className="card-title text-center pb-0 fs-4">Iniciar sesión</h5>
+                      <p className="text-center small">Ingrese su nombre de usuario y contraseña para iniciar sesión</p>
                     </div>
-
-                    <form onSubmit={handleLogin} class="row g-3 needs-validation">
-
-                      <div class="col-12">
-                        <label class="form-label">Correo electrónico:</label>
+                    <form onSubmit={handleLogin} className="row g-3 needs-validation">
+                      <div className="col-12">
+                        <label className="form-label">Correo electrónico:</label>
                         <div className="input-group has-validation">
-                          <img
+                          {/* <img
                             src={IconUsuario}
                             alt="username-icon"
                             style={{ height: '2.5rem', pointerEvents: 'none' }}
                             className=" input-group-text bg-info"
-                          />
+                          /> */}
                           <input
                             className="form-control bg-light"
                             type="email"
@@ -154,63 +105,60 @@ const Login = () => {
                             name="email"
                             value={correo}
                             onChange={(event) => setCorreo(event.target.value)} />
-                          <div class="invalid-feedback">Por favor, ingrese su nombre de usuario.</div>
+                          <div className="invalid-feedback">Por favor, ingrese su nombre de usuario.</div>
                         </div>
                       </div>
-
-                      <div class="col-12">
-                        <label class="form-label">Contraseña:</label>
-                        <div class="input-group has-validation">
-                          <img
+                      <div className="col-12">
+                        <label className="form-label">Contraseña:</label>
+                        <div className="password-input-wrapper input-group has-validation">
+                          {/* <img
                             src={IconPassword}
-                            alt="username-icon"
+                            alt="password-icon"
                             style={{ height: '2.5rem', pointerEvents: 'none' }}
-                            className=" input-group-text bg-info"
-                          />
+                            className="input-group-text bg-info"
+                          /> */}
                           <input
                             className="form-control bg-light"
                             type={mostrarContrasena ? 'text' : 'password'}
                             placeholder="Ingrese su contraseña"
                             name="password"
-                            // minLength="8"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                           />
-                          <i
-                            className={`mt-2 ms-2 show-password-icon ${mostrarContrasena ? 'fa fa-eye-slash' : 'fa fa-eye'}`}
-                            onClick={toggleMostrarContrasena}
-                          />
+                          <span className="btn btn-outline-secondary" onClick={toggleMostrarContrasena}>
+                            {mostrarContrasena ? <FaEyeSlash /> : <FaEye />} {/* Usa los iconos FaEye y FaEyeSlash */}
+                          </span>
+                          <div className="invalid-feedback">¡Por favor, introduzca su contraseña!</div>
                         </div>
-                        <div class="invalid-feedback">¡Por favor, introduzca su contraseña!</div>
                       </div>
-                      <div class="col-12">
-                        <button type="submit" class="btn btn-primary w-100" >Acceso</button>
+                      <div className="col-12">
+                        <button type="submit" className="btn btn-primary w-100" >Acceso</button>
                       </div>
                       {alert && alert.type === 'danger' && (
                         <Alert type="danger" message={alert.message} onClose={closeAlert} />
                       )}
-
                     </form>
-
                     <div className="my-3">
-                      <div class="col-12">
-                        <p class="small mb-0">¿No tienes cuenta? <Link to="/registro">Crea una cuenta</Link></p>
-                      </div>
-                      <div class="col-12">
-                        <p class="small mb-0">¿Contraseña Olvidada? <Link to="/recuperacion">Recupera tu cuenta</Link></p>
-                      </div>
-                    </div>
+  <div className="col-12">
+    <p className="small mb-0">
+      <i className="fas fa-user-plus me-1"></i> ¿No tienes cuenta? <Link to="/registro" className="link-primary">Crea una cuenta</Link>
+    </p>
+  </div>
+  <div className="col-12 mt-2"> {/* Agrega un margen superior para separar los enlaces */}
+    <p className="small mb-0">
+      <i className="fas fa-lock me-1"></i> ¿Contraseña Olvidada? <Link to="/recuperacion" className="link-primary">Recupera tu cuenta</Link>
+    </p>
+  </div>
+</div>
+
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
-
         </section>
-
       </div>
-      <Footer />
+      <Footer className="pt-0" />
     </div>
   );
 };
