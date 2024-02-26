@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../../Esquema/Header.js';
 import Footer from '../../Esquema/Footer';
@@ -24,10 +24,34 @@ const Registro = () => {
   const [contrasenaError, setContrasenaError] = useState('');
   const [contrasenaFuerza, setContrasenaFuerza] = useState('');
   const [mostrarConfirmarContrasena, setMostrarConfirmarContrasena] = useState(false);
-  const [terminosAceptados, setTerminosAceptados] = useState(false);
+  const [validacionExitosa, setValidacionExitosa] = useState(false);
 
   const navigate = useNavigate();
   const captcha = useRef(null);
+
+  useEffect(() => {
+    // Verificar si todas las validaciones son exitosas
+    if (
+      nombre.trim() !== '' &&
+      primerApellido.trim() !== '' &&
+      segundoApellido.trim() !== '' &&
+      email.trim() !== '' &&
+      contrasena !== '' &&
+      confirmarContrasena !== '' &&
+      nombreError === '' &&
+      primerApellidoError === '' &&
+      segundoApellidoError === '' &&
+      emailError === '' &&
+      contrasenaError.length === 0 &&
+      contrasenaFuerza === 'Fuerte' &&
+      passwordErrors.length === 0 &&
+      validarCorreoElectronico(email)
+    ) {
+      setValidacionExitosa(true);
+    } else {
+      setValidacionExitosa(false);
+    }
+  }, [nombre, primerApellido, segundoApellido, email, contrasena, confirmarContrasena, nombreError, primerApellidoError, segundoApellidoError, emailError, contrasenaError, contrasenaFuerza, passwordErrors]);
 
   const handleNombreChange = (e) => {
     const inputValue = e.target.value;
@@ -98,6 +122,7 @@ const Registro = () => {
     }
   };
 
+
   const handleConfirmarContrasenaChange = (e) => {
     const inputValue = e.target.value;
     setConfirmarContrasena(inputValue);
@@ -106,44 +131,12 @@ const Registro = () => {
     setContrasenaError('');
   };
 
-  const handleTerminosChange = (e) => {
-    setTerminosAceptados(e.target.checked);
-  };
 
   const handleRegistro = async (event) => {
     event.preventDefault();
 
-    if (
-      nombre.trim() === '' ||
-      primerApellido.trim() === '' ||
-      segundoApellido.trim() === '' ||
-      email.trim() === '' ||
-      contrasena === '' ||
-      confirmarContrasena === ''
-    ) {
-      setAlerta('Por favor completa todos los campos.');
-      return;
-    }
-    const nombreValido = validarNombre(nombre);
-    const apellidoPaternoValido = validarApellido(primerApellido, "Apellido Paterno", setPrimerApellidoError);
-    const apellidoMaternoValido = validarApellido(segundoApellido, "Apellido Materno", setSegundoApellidoError);
-
-    if (!nombreValido || !apellidoPaternoValido || !apellidoMaternoValido) {
-      setAlerta('Por favor completa y verifica los campos marcados.');
-      return;
-    }
-    if (!validarCorreoElectronico(email)) {
-      setAlerta('Por favor ingrese una dirección de correo electrónico válida.');
-      return;
-    }
-
-    if (passwordErrors.length > 0) {
-      setAlerta(passwordErrors.join(' '));
-      return;
-    }
-
-    if (!terminosAceptados) {
-      setAlerta('Debe aceptar los términos y condiciones.');
+    if (!validacionExitosa) {
+      setAlerta('Por favor completa todos los campos correctamente.');
       return;
     }
 
@@ -218,7 +211,6 @@ const Registro = () => {
 
     return errors;
   };
-
   const validarNombre = (value) => {
     if (!value.trim()) {
       setNombreError('¡Por favor, escriba su nombre!');
@@ -259,23 +251,6 @@ const Registro = () => {
     } else {
       return 'Débil';
     }
-  };
-
-  const isFormValid = () => {
-    return (
-      nombre.trim() !== '' &&
-      primerApellido.trim() !== '' &&
-      segundoApellido.trim() !== '' &&
-      email.trim() !== '' &&
-      contrasena !== '' &&
-      confirmarContrasena !== '' &&
-      nombreError === '' &&
-      primerApellidoError === '' &&
-      segundoApellidoError === '' &&
-      emailError === '' &&
-      contrasenaError.length === 0 &&
-      terminosAceptados
-    );
   };
 
   return (
@@ -358,13 +333,8 @@ const Registro = () => {
                         </div>
                       )}
 
-                      <div className="col-12 form-check">
-                        <input type="checkbox" className="form-check-input" id="terminosCheck" checked={terminosAceptados} onChange={handleTerminosChange} />
-                        <label className="form-check-label" htmlFor="terminosCheck">Acepto los <Link to="/terminos-y-condiciones">términos y condiciones</Link></label>
-                      </div>
-
                       <div className="col-12">
-                        <button className="btn btn-primary w-100" type="submit" disabled={!isFormValid()}>Crear una cuenta</button>
+                        <button className="btn btn-primary w-100" type="submit" disabled={!validacionExitosa}>Crear una cuenta</button>
                       </div>
                       {alerta && (
                         <div className="col-12 mt-2">
