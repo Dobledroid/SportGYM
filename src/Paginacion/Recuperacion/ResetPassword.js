@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
@@ -7,6 +7,7 @@ import { baseURL, fetchData } from '../../api.js';
 import Header from '../../Esquema/Header.js';
 import Footer from '../../Esquema/Footer';
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import weakPasswords from './ListNegra.js';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -18,6 +19,7 @@ const ResetPassword = () => {
   const [alert, setAlert] = useState(null);
   const [contrasenaError, setContrasenaError] = useState([]);
   const [contrasenaFuerza, setContrasenaFuerza] = useState('');
+  const [blacklisted, setBlacklisted] = useState(false);
 
   const validarContrasena = (password, confirmation) => {
     const mayusculas = /[A-Z]/;
@@ -46,9 +48,17 @@ const ResetPassword = () => {
     if (!caracteres.test(password)) {
       errors.push("- La contraseña debe tener al menos un carácter especial.");
     }
-
     return errors;
   };
+
+  const toggleMostrarContrasena = () => {
+    setMostrarContrasena(!mostrarContrasena);
+  };
+
+  const toggleMostrarConfirmContrasena = () => {
+    setMostrarConfirmContrasena(!mostrarConfirmContrasena);
+  };
+  
 
   const handlePasswordChange = (event) => {
     const newPassword = event.target.value;
@@ -56,8 +66,13 @@ const ResetPassword = () => {
     const errors = validarContrasena(newPassword, confirmacion);
     setContrasenaError(errors);
     setContrasenaFuerza(calcularFuerzaContrasena(errors));
-    // Si la contraseña cumple con las validaciones, mostrar el input de confirmar contraseña
-    setMostrarConfirmContrasena(errors.length === 0);
+    if (errors.length === 0) {
+      // Si no hay errores de validación, verificar si la contraseña está en la lista negra
+      verificarContraseñaEnListaNegra(newPassword);
+    } else {
+      // Si hay errores de validación, establecer la contraseña como no está en la lista negra
+      setBlacklisted(false);
+    }
   };
 
   const calcularFuerzaContrasena = (errors) => {
@@ -70,11 +85,24 @@ const ResetPassword = () => {
     }
   };
 
+  const verificarContraseñaEnListaNegra = (password) => {
+    try {
+      if (weakPasswords.includes(password)) {
+        setBlacklisted(true);
+      } else {
+        setBlacklisted(false);
+      }
+    } catch (error) {
+      console.error('Error al verificar contraseña en lista negra:', error);
+    }
+  };
+  
+
   const handleResetPassword = async (event) => {
     event.preventDefault();
     try {
       const data = location.state;
-      if (contrasenaError.length === 0) {
+      if (contrasenaError.length === 0 && !blacklisted) {
         const response = await fetchData(`${baseURL}/users/update-password/${data.ID_usuario}`, {
           method: 'PUT',
           headers: {
@@ -101,10 +129,6 @@ const ResetPassword = () => {
     }
   };
 
-  const isFormValid = () => {
-    return password === confirmacion && contrasenaError.length === 0;
-  };
-
   return (
     <div>
       <Header />
@@ -125,7 +149,7 @@ const ResetPassword = () => {
                         <div className="input-group ">
                           <input
                             type={mostrarContrasena ? 'text' : 'password'}
-                            className={`form-control ${contrasenaError.length > 0 }`}
+                            className={`form-control ${contrasenaError.length > 0 || blacklisted ? 'is-invalid' : ''}`}
                             placeholder="Ingrese su contraseña"
                             required
                             maxLength="100"
@@ -133,7 +157,7 @@ const ResetPassword = () => {
                             value={password}
                             onChange={handlePasswordChange}
                           />
-                          {mostrarContrasena ? <FaEyeSlash className="mt-2 ms-2 show-password-icon" onClick={() => setMostrarContrasena(false)} /> : <FaEye className="mt-2 ms-2 show-password-icon" onClick={() => setMostrarContrasena(true)} />}
+                          <FaEyeSlash className="mt-2 ms-2 show-password-icon" onClick={toggleMostrarContrasena} />
                           <ProgressBar
                             now={contrasenaFuerza === 'Débil' ? 25 : contrasenaFuerza === 'Medio' ? 50 : contrasenaFuerza === 'Fuerte' ? 100 : 0}
                             label={contrasenaFuerza}
@@ -150,30 +174,35 @@ const ResetPassword = () => {
                               </div>
                             </div>
                           )}
+                          {blacklisted && (
+                            <div className="col-12">
+                              <div className="alert alert-danger">
+                                La contraseña ingresada está en la lista negra, ntenta con otra.
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      {mostrarConfirmContrasena && (
-                        <div className="col-12">
-                          <label htmlFor="yourPassword" className="form-label">Confirma la nueva contraseña:</label>
-                          <div className="input-group has-validation">
-                            <input
-                              type={mostrarConfirmContrasena ? 'text' : 'password'}
-                              name="password"
-                              id="password"
-                              placeholder="Confirme su contraseña"
-                              required
-                              maxLength="100"
-                              minLength="8"
-                              value={confirmacion}
-                              onChange={(event) => setConfirmacion(event.target.value)}
-                              className="form-control"
-                            />
-                            {mostrarConfirmContrasena ? <FaEyeSlash className="mt-2 ms-2 show-password-icon" onClick={() => setMostrarConfirmContrasena(false)} /> : <FaEye className="mt-2 ms-2 show-password-icon" onClick={() => setMostrarConfirmContrasena(true)} />}
-                          </div>
-                        </div>
-                      )}
                       <div className="col-12">
-                        <button className="btn btn-primary w-100" type="submit" disabled={!isFormValid()}>Acceso</button>
+                        <label htmlFor="yourPassword" className="form-label">Confirma la nueva contraseña:</label>
+                        <div className="input-group has-validation">
+                          <input
+                            type={mostrarConfirmContrasena ? 'text' : 'password'}
+                            name="password"
+                            id="password"
+                            placeholder="Confirme su contraseña"
+                            required
+                            maxLength="100"
+                            minLength="8"
+                            value={confirmacion}
+                            onChange={(event) => setConfirmacion(event.target.value)}
+                            className="form-control"
+                          />
+                          <FaEyeSlash className="mt-2 ms-2 show-password-icon" onClick={toggleMostrarConfirmContrasena} />
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <button className="btn btn-primary w-100" type="submit" disabled={contrasenaError.length > 0 || blacklisted}>Acceso</button>
                       </div>
                       {alert && alert.type === 'danger' && (
                         <Alert type="danger" message={alert.message} onClose={() => setAlert(null)} />
