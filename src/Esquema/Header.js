@@ -83,7 +83,7 @@ const Header = () => {
       </div>
 
       {/* para pantallas grandes  */}
-      <header class="header">
+      <header class="header sticky-top">
         {/* <div class="header__top">
           <div class="container bg-warning">
             <div class="row">

@@ -106,6 +106,8 @@ const Rutas = () => {
         <Route path='/map' Component={ MapComponent }></Route>
         
         
+        {/* <Route path='/menuVisual' Component={ MenuAccessible }></Route> */}
+
         <Route path='/apiUser' Component={ ApiDataDisplay }></Route>
         <Route path='/membresias' Component={ MembershipComponent }></Route>
         <Route path='/suscripcion' Component={ Suscripcion }></Route>
@@ -133,7 +135,7 @@ const Rutas = () => {
         {/* <Route path='/indexH' Component={ IndexCargaRapida }></Route>
         <Route path='/terminos-y-condicionesH' Component={ TerminosCondicionesH }></Route>
         <Route path='/t' Component={ TextToSpeech }></Route>
-        <Route path='/menuVisual' Component={ MenuAccessible }></Route>
+  
         <Route path='/cookiesV' Component={ CookiePolicyV }></Route>
 
 
