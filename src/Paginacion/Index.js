@@ -7,7 +7,7 @@ import './Index.css'
 
 const Index = () => {
   return (
-    <>
+    <div className='content'>
       <Header />
       <section className='hero mt-1'>
       <div id="carouselExampleCaptions" class="carousel slide">
@@ -264,7 +264,7 @@ const Index = () => {
       </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }
 

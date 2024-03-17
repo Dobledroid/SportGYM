@@ -30,6 +30,7 @@ const Suscripcion = () => {
 
   const handlePagarSuscripcion = async () => {
     console.log(data);
+
     const id = user.ID_usuario;
     try {
       // Realizar fetch para obtener la información del usuario
@@ -58,7 +59,8 @@ const Suscripcion = () => {
             },
             body: JSON.stringify({
               ...data,
-              ID_usuario: id
+              ID_usuario: id,
+              correo: user.correo
             }),
           });
 
@@ -84,7 +86,8 @@ const Suscripcion = () => {
           },
           body: JSON.stringify({
             ...data,
-            ID_usuario: id
+            ID_usuario: id,
+            correo: user.correo
           }),
         });
 

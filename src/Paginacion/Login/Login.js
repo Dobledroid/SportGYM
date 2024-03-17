@@ -9,6 +9,7 @@ import { auth } from "./firebase.js";
 import Alert from '../Validaciones/Alerts/Alert.js';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importa los iconos FaEye y FaEyeSlash
 import './Login.css';
+import { baseURL } from '../../api.js';
 
 const Login = () => {
   const [correo, setCorreo] = useState('');
@@ -40,7 +41,7 @@ const Login = () => {
         return;
       }
       // const response = await fetch('http://localhost:3010/api/users/login', {
-      const response = await fetch('https://api-rest-sport.vercel.app/api/users/login', {
+      const response = await fetch(`${baseURL}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

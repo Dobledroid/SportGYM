@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styles from './Productos.module.css';
 import Header from '../../Esquema/Header';
 import Footer from '../../Esquema/Footer';
+import { baseURL } from '../../api.js';
 
 const Productos = () => {
   const [productosOriginales, setProductosOriginales] = useState([]);
@@ -32,6 +33,13 @@ const Productos = () => {
     filtrarProductos({ categoriaId: categoria.ID_categoria });
   };
 
+  const handleSubcaSeleccionada = (categoria) => {
+    console.log("handleCategoriaSeleccionada", categoria.ID_categoria)
+    setCategoriaSeleccionada(categoria);
+    setMarcaSeleccionada(null); // Limpiar marca seleccionada al seleccionar una categoría
+    setSubcategoriaSeleccionada(null); // Limpiar subcategoría seleccionada al seleccionar una categoría
+    filtrarProductos({ categoriaId: categoria.ID_categoria });
+  };
 
   const handleMarcaClick = (marcaId) => {
     setMarcaSeleccionada(marcaId);
@@ -46,7 +54,7 @@ const Productos = () => {
   const filtrarProductos = async (filtros) => {
     console.log("filtros", filtros)
     try {
-      const response = await fetch(`http://localhost:3001/api/products?${new URLSearchParams(filtros).toString()}`);
+      const response = await fetch(`${baseURL}/products?${new URLSearchParams(filtros).toString()}`);
       if (!response.ok) {
         throw new Error(`Error en la petición: ${response.status}`);
       }
@@ -62,7 +70,7 @@ const Productos = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/products');
+        const response = await fetch(`${baseURL}/products`);
         if (!response.ok) {
           throw new Error(`Error en la petición: ${response.status}`);
         }
@@ -76,7 +84,7 @@ const Productos = () => {
 
     const fetchCategorias = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/categorias-productos');
+        const response = await fetch(`${baseURL}/categorias-productos`);
         if (!response.ok) {
           throw new Error(`Error en la petición de categorías: ${response.status}`);
         }
@@ -90,7 +98,7 @@ const Productos = () => {
 
     const fetchMarcas = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/marcas');
+        const response = await fetch(`${baseURL}/marcas`);
         if (!response.ok) {
           throw new Error(`Error en la petición de marcas: ${response.status}`);
         }
@@ -103,7 +111,7 @@ const Productos = () => {
 
     const fetchSubcategorias = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/subcategorias');
+        const response = await fetch(`${baseURL}/subcategorias`);
         if (!response.ok) {
           throw new Error(`Error en la petición de subcategorías: ${response.status}`);
         }
@@ -152,7 +160,7 @@ const Productos = () => {
   };
 
   return (
-    <>
+    <div className='content'>
       <Header />
       <section class="hero">
         <div class="container">
@@ -244,22 +252,52 @@ const Productos = () => {
                 <div className={`${styles.sidebarSection}`}>
                   <h3>Marcas</h3>
                   <ul>
+                    {/* Mostrar la categoría seleccionada si está definida */}
+                    {marcaSeleccionada && (
+                      <li key={marcaSeleccionada.id}>
+                        <span>{marcaSeleccionada.nombre}</span>
+                        <button onClick={limpiarFiltro}>X</button>
+                      </li>
+                    )}
+                    {/* Mostrar las demás categorías si no hay una seleccionada */}
+                    {!marcaSeleccionada && marcas.map(marca => (
+                      <li key={marca.id}>
+                        <Link to="#" onClick={() => handleCategoriaSeleccionada(marca)}>{marca.nombre}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                  {/* <ul>
                     {marcas.map(marca => (
                       <li key={marca.id}>
                         <Link to={`/marca/${marca.id}`}>{marca.nombre}</Link>
                       </li>
                     ))}
-                  </ul>
+                  </ul> */}
                 </div>
                 <div className={`${styles.sidebarSection}`}>
                   <h3>Subcategorías</h3>
                   <ul>
+                    {/* Mostrar la categoría seleccionada si está definida */}
+                    {subcategoriaSeleccionada && (
+                      <li key={subcategoriaSeleccionada.id}>
+                        <span>{subcategoriaSeleccionada.nombre}</span>
+                        <button onClick={limpiarFiltro}>X</button>
+                      </li>
+                    )}
+                    {/* Mostrar las demás categorías si no hay una seleccionada */}
+                    {!subcategoriaSeleccionada && subcategorias.map(subcategoria => (
+                      <li key={subcategoria.id}>
+                        <Link to="#" onClick={() => handleCategoriaSeleccionada(subcategoria)}>{subcategoria.nombre}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                  {/* <ul>
                     {subcategorias.map(subcategoria => (
                       <li key={subcategoria.id}>
                         <Link to={`/subcategoria/${subcategoria.id}`}>{subcategoria.nombre}</Link>
                       </li>
                     ))}
-                  </ul>
+                  </ul> */}
                 </div>
                 <div className={`${styles.sidebarSection}`}>
                   <h3>Precio</h3>
@@ -313,7 +351,7 @@ const Productos = () => {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 };
 

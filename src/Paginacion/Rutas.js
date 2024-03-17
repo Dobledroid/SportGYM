@@ -59,6 +59,12 @@ import MembershipComponent from './Membresillas/MembershipComponent';
 import Suscripcion from './Membresillas/Subcripcion';
 import Membresia from './Usuario/Membresia';
 import HistorialMembresias from './Usuario/HistorialMembresias';
+
+import Precios from './Membresillas/Precios';
+import ProductosList from './Productos/ProductosList';
+import ProductDetails from './Productos/ProductDetails';
+import ProductGrid from './Productos/product-grid';
+
 // import Error from './Validaciones/Error404/Error';
 const Rutas = () => {
   return (
@@ -75,6 +81,7 @@ const Rutas = () => {
         <Route path='/example' Component={Example}></Route>
         <Route path='/filtros' Component={Filtros}></Route>
         <Route path='/productos2' Component={Productos2}></Route>
+        <Route path='/producto-grid' Component={ ProductGrid }></Route>
 
         <Route path='/privacidad' Component={PrivacyPolicy}></Route>
         <Route path='/terminos-y-condiciones' Component={Terminos}></Route>
@@ -109,6 +116,12 @@ const Rutas = () => {
         <Route path='/apiUser' Component={ ApiDataDisplay }></Route>
         <Route path='/membresias' Component={ MembershipComponent }></Route>
         <Route path='/suscripcion' Component={ Suscripcion }></Route>
+
+
+        {/* COMPONENTES QUE DEBEN SER MODIFICADOS CON ESTILOS  */}
+        <Route path='/precios' Component={ Precios }></Route>
+        <Route path='/list' Component={ ProductosList }></Route>
+        <Route path='/details' Component={ ProductDetails }></Route>
 
         <Route path='*' Component={ Error404 }></Route>
         {/* <Route path='/error-500' Component={ Error500 }></Route> */}
