@@ -62,8 +62,11 @@ import HistorialMembresias from './Usuario/HistorialMembresias';
 
 import Precios from './Membresillas/Precios';
 import ProductosList from './Productos/ProductosList';
-import ProductDetails from './Productos/ProductDetails';
+import ProductDetails from './Productos/product-details';
 import ProductGrid from './Productos/product-grid';
+import Carrito from './Productos/Carrito';
+import Checkout from './Productos/Checkout';
+import PruebaAbrirModal from './Productos/PruebaAbrirModal';
 
 // import Error from './Validaciones/Error404/Error';
 const Rutas = () => {
@@ -82,6 +85,10 @@ const Rutas = () => {
         <Route path='/filtros' Component={Filtros}></Route>
         <Route path='/productos2' Component={Productos2}></Route>
         <Route path='/producto-grid' Component={ ProductGrid }></Route>
+        <Route path='/product-details/:id' Component={ ProductDetails }></Route>
+        <Route path='/carrito' Component={ Carrito }></Route>
+        <Route path='/checkout' Component={ Checkout }></Route>
+        <Route path='/modal' Component={ PruebaAbrirModal }></Route>
 
         <Route path='/privacidad' Component={PrivacyPolicy}></Route>
         <Route path='/terminos-y-condiciones' Component={Terminos}></Route>

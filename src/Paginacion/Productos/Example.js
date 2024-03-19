@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../../Esquema/Header';
 import Footer from '../../Esquema/Footer';
 import PriceRangeSlider from './PriceRangeSlider';
@@ -57,6 +58,7 @@ function SidebarItem({ title, items, onFilter }) {
 }
 
 function ProductItem({ product }) {
+
   return (
     <div className="col-lg-4 col-md-6 col-sm-6">
       <div className="product__item">
@@ -68,10 +70,10 @@ function ProductItem({ product }) {
             <li><a href="#"><i className="fa fa-shopping-cart"></i></a></li>
           </ul>
         </div>
-        <div className="product__item__text">
+        <Link to={`/product-details/${product.ID_producto}`} className="product__item__text" >
           <h6><a href="#">{product.nombre}</a></h6>
           <h5>${product.precio}</h5>
-        </div>
+        </Link>
       </div>
     </div>
   );

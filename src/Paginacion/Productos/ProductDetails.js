@@ -4,7 +4,7 @@ import styles from './Productos.module.css';
 import Header from '../../Esquema/Header';
 import Footer from '../../Esquema/Footer';
 
-const ProductDetails = () => {
+const ProductDetails22 = () => {
 
 
 
@@ -162,4 +162,4 @@ const ProductDetails = () => {
   );
 };
 
-export default ProductDetails;
+export default ProductDetails22;
