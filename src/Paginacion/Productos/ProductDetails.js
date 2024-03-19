@@ -5,10 +5,6 @@ import Header from '../../Esquema/Header';
 import Footer from '../../Esquema/Footer';
 
 const ProductDetails = () => {
-
-
-
-
   return (
     <>
       <div class="card">

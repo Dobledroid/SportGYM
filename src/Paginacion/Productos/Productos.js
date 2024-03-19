@@ -4,7 +4,7 @@ import styles from './Productos.module.css';
 import Header from '../../Esquema/Header';
 import Footer from '../../Esquema/Footer';
 import { baseURL } from '../../api.js';
-
+import ProductModal from './ProductModal/ProductModal';
 const Productos = () => {
   const [productosOriginales, setProductosOriginales] = useState([]);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
@@ -19,11 +19,20 @@ const Productos = () => {
 
   const [showFilters, setShowFilters] = useState(false);
   const [screenSize, setScreenSize] = useState(window.innerWidth);
+  const [selectedProduct, setSelectedProduct] = useState(null); // Estado para almacenar el producto seleccionado
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
+  // Función para manejar la selección de un producto
+  const handleProductClick = (producto) => {
+    setSelectedProduct(producto); // Almacena el producto seleccionado en el estado
+  };
 
+  // Función para cerrar el modal
+  const handleCloseModal = () => {
+    setSelectedProduct(null); // Limpia el producto seleccionado cuando se cierra el modal
+  };
   // Función para manejar la selección de una categoría
   const handleCategoriaSeleccionada = (categoria) => {
     console.log("handleCategoriaSeleccionada", categoria.ID_categoria)
@@ -320,28 +329,27 @@ const Productos = () => {
               <div className="row">
                 {productosFiltrados.map((producto, index) => (
                   <div key={index} className="col-md-4 mb-4">
-                    <Link to={`/verdetalleproducto/${producto.ID_producto}`}>
-                      <div className={`${styles.productCard} card`}>
-                        <img src={producto.imagenUrl} alt={`Producto ${producto.ID_producto}`} className="card-img-top" />
-                        <div className={`${styles.cardBody} card-body`}>
-                          <h5 className="card-title">{producto.nombre}</h5>
-                          <div className="star-rating">
-                            <ul className="list-inline">
-                              <li className="list-inline-item"><i className="fa fa-star"></i></li>
-                              <li className="list-inline-item"><i className="fa fa-star"></i></li>
-                              <li className="list-inline-item"><i className="fa fa-star"></i></li>
-                              <li className="list-inline-item"><i className="fa fa-star"></i></li>
-                              <li className="list-inline-item"><i className="fa fa-star-o"></i></li>
-                            </ul>
-                          </div>
-                          <p className="card-text">
-                            <span className="text-danger"><strike>${producto.precio}</strike></span>
-                            <br />
-                            <span className="text-muted">${producto.precioDescuento}</span>
-                          </p>
+                    {/* Modifica el Link para abrir el modal */}
+                    <div className={`${styles.productCard} card`} onClick={() => handleProductClick(producto)}>
+                      <img src={producto.imagenUrl} alt={`Producto ${producto.ID_producto}`} className="card-img-top" />
+                      <div className={`${styles.cardBody} card-body`}>
+                        <h5 className="card-title">{producto.nombre}</h5>
+                        <div className="star-rating">
+                          <ul className="list-inline">
+                            <li className="list-inline-item"><i className="fa fa-star"></i></li>
+                            <li className="list-inline-item"><i className="fa fa-star"></i></li>
+                            <li className="list-inline-item"><i className="fa fa-star"></i></li>
+                            <li className="list-inline-item"><i className="fa fa-star"></i></li>
+                            <li className="list-inline-item"><i className="fa fa-star-o"></i></li>
+                          </ul>
                         </div>
+                        <p className="card-text">
+                          <span className="text-danger"><strike>${producto.precio}</strike></span>
+                          <br />
+                          <span className="text-muted">${producto.precioDescuento}</span>
+                        </p>
                       </div>
-                    </Link>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -349,7 +357,13 @@ const Productos = () => {
 
           </div>
         </div>
-      </div>
+      </div>{/* Renderiza el modal solo si hay un producto seleccionado */}
+      {selectedProduct && (
+        <ProductModal
+          producto={selectedProduct}
+          onClose={handleCloseModal} // Proporciona la función para cerrar el modal
+        />
+      )}
       <Footer />
     </div>
   );
