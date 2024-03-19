@@ -9,6 +9,7 @@ const ProductDetails22 = () => {
 
 
 
+const ProductDetails = () => {
   return (
     <>
       <div class="card">

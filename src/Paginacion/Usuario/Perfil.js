@@ -39,7 +39,7 @@ const Panel = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
 
-    
+    navigate('/login')
   };
 
   const handleMembresia = () => {

@@ -22,7 +22,7 @@ const ProductCard = () => {
 
   const peticionGet = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/products');
+      const response = await fetch('http://localhost:4000/api/products');
       if (!response.ok) {
         throw new Error(`Error en la petición: ${response.status}`);
       }
