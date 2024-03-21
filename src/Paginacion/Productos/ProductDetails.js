@@ -4,12 +4,9 @@ import styles from './Productos.module.css';
 import Header from '../../Esquema/Header';
 import Footer from '../../Esquema/Footer';
 
-const ProductDetails22 = () => {
-
-
-
 
 const ProductDetails = () => {
+
   return (
     <>
       <div class="card">
@@ -163,4 +160,4 @@ const ProductDetails = () => {
   );
 };
 
-export default ProductDetails22;
+export default ProductDetails;
