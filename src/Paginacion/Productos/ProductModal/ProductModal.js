@@ -43,7 +43,7 @@ const ProductModal = ({ producto, onClose }) => {
           <img src={producto.imagenUrl} alt={`Producto ${producto.ID_producto}`} className="img-fluid" />
           <p><strong>Descripción:</strong></p>
           <p style={{ textAlign: 'justify' }}>{producto.descripcion}</p>
-          <p><strong>Precio:</strong> ${producto.precioDescuento}</p>
+          <p><strong>Precio:</strong> ${producto.precioFinal}</p>
           <PayPalScriptProvider>
             <PayPalButtons
               style={{ layout: 'horizontal' }}
@@ -51,7 +51,7 @@ const ProductModal = ({ producto, onClose }) => {
                 return actions.order.create({
                   purchase_units: [{
                     amount: {
-                      value: producto.precioDescuento
+                      value: producto.precioFinal
                     }
                   }]
                 });

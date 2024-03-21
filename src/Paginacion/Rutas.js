@@ -67,6 +67,7 @@ import ProductGrid from './Productos/product-grid';
 import Carrito from './Productos/Carrito';
 import Checkout from './Productos/Checkout';
 import PruebaAbrirModal from './Productos/PruebaAbrirModal';
+import DireccionesEnvio from './Productos/DireccionesEnvio';
 
 // import Error from './Validaciones/Error404/Error';
 const Rutas = () => {
@@ -75,6 +76,7 @@ const Rutas = () => {
       {/* <ActiveLastBreadcrumb /> */}
 
       <Routes>
+
         <Route path='/' Component={Index}></Route>
 
         <Route path='/header' Component={Header}></Route>
@@ -84,11 +86,11 @@ const Rutas = () => {
         <Route path='/example' Component={Example}></Route>
         <Route path='/filtros' Component={Filtros}></Route>
         <Route path='/productos2' Component={Productos2}></Route>
-        <Route path='/producto-grid' Component={ ProductGrid }></Route>
-        <Route path='/product-details/:id' Component={ ProductDetails }></Route>
-        <Route path='/carrito' Component={ Carrito }></Route>
-        <Route path='/checkout' Component={ Checkout }></Route>
-        <Route path='/modal' Component={ PruebaAbrirModal }></Route>
+        <Route path='/producto-grid' Component={ProductGrid}></Route>
+        <Route path='/product-details/:id' Component={ProductDetails}></Route>
+        <Route path='/carrito' Component={Carrito}></Route>
+        <Route path='/checkout' Component={Checkout}></Route>
+        <Route path='/modal' Component={PruebaAbrirModal}></Route>
 
         <Route path='/privacidad' Component={PrivacyPolicy}></Route>
         <Route path='/terminos-y-condiciones' Component={Terminos}></Route>
@@ -99,40 +101,41 @@ const Rutas = () => {
         <Route path='/registro' Component={Registro}></Route>
         <Route path='/login' Component={Login}></Route>
 
-        <Route path='/mfa' Component={ MFA }></Route>
-        <Route path='/perfil' Component={ Perfil }></Route>
-        <Route path='/membresia' Component={ Membresia }></Route>
-        <Route path='/historialMembresias' Component={ HistorialMembresias }></Route>
+        <Route path='/mfa' Component={MFA}></Route>
+        <Route path='/perfil' Component={Perfil}></Route>
+        <Route path='/direccion-envio' Component={ DireccionesEnvio }></Route>
+        <Route path='/membresia' Component={Membresia}></Route>
+        <Route path='/historialMembresias' Component={HistorialMembresias}></Route>
 
-        <Route path='/si' Component={ Sidebar }></Route>
+        <Route path='/si' Component={Sidebar}></Route>
 
-        <Route path='/login2' Component={ Login2 }></Route>
+        <Route path='/login2' Component={Login2}></Route>
         <Route path='/recuperacion' Component={Recuperacion}></Route>
-        <Route path='/validacion' Component={ Token }></Route>
-        <Route path='/resetPassword' Component={ ResetPassword }></Route>
-        
+        <Route path='/validacion' Component={Token}></Route>
+        <Route path='/resetPassword' Component={ResetPassword}></Route>
+
         <Route path='/AdmProductos' Component={AdmProductos}></Route>
         <Route path='/AgregarProducto' Component={AgregarProducto}></Route>
         <Route path='/EditarProducto' Component={EditarProducto}></Route>
 
 
-        <Route path='/subirImagen' Component={ subirImagen }></Route>
-        <Route path='/map' Component={ MapComponent }></Route>
-        
-        
+        <Route path='/subirImagen' Component={subirImagen}></Route>
+        <Route path='/map' Component={MapComponent}></Route>
+
+
         {/* <Route path='/menuVisual' Component={ MenuAccessible }></Route> */}
 
-        <Route path='/apiUser' Component={ ApiDataDisplay }></Route>
-        <Route path='/membresias' Component={ MembershipComponent }></Route>
-        <Route path='/suscripcion' Component={ Suscripcion }></Route>
+        <Route path='/apiUser' Component={ApiDataDisplay}></Route>
+        <Route path='/membresias' Component={MembershipComponent}></Route>
+        <Route path='/suscripcion' Component={Suscripcion}></Route>
 
 
         {/* COMPONENTES QUE DEBEN SER MODIFICADOS CON ESTILOS  */}
-        <Route path='/precios' Component={ Precios }></Route>
-        <Route path='/list' Component={ ProductosList }></Route>
-        <Route path='/details' Component={ ProductDetails }></Route>
+        <Route path='/precios' Component={Precios}></Route>
+        <Route path='/list' Component={ProductosList}></Route>
+        <Route path='/details' Component={ProductDetails}></Route>
 
-        <Route path='*' Component={ Error404 }></Route>
+        <Route path='*' Component={Error404}></Route>
         {/* <Route path='/error-500' Component={ Error500 }></Route> */}
 
 
@@ -167,7 +170,6 @@ const Rutas = () => {
 
 
  */}
-
       </Routes>
     </>
   )

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import Header from "../../Esquema/Header";
 import Footer from "../../Esquema/Footer";
 import Modal from 'react-bootstrap/Modal';
@@ -7,9 +8,17 @@ import { baseURL } from '../../api.js';
 
 const Carrito = () => {
   const [productos, setProductos] = useState([]);
+  const [user, setUser] = useState('');
+
   const [idItemAEliminar, setIdItemAEliminar] = useState(null);
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [codigoDescuento, setCodigoDescuento] = useState('');
+  const [descuentoAplicado, setDescuentoAplicado] = useState(false);
+
+
+  const navigate = useNavigate();
 
   const modalStyles = {
     modalTransparent: {
@@ -22,6 +31,7 @@ const Carrito = () => {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (loggedIn) {
         const user = JSON.parse(localStorage.getItem('user'));
+        setUser(user);
         try {
           const response = await fetch(`${baseURL}/carrito-compras/${user.ID_usuario}`);
           if (response.ok) {
@@ -51,10 +61,38 @@ const Carrito = () => {
     if (productoAEliminar !== null) {
     }
   }, [productoAEliminar]);
+
   const handleDecrement = (ID_producto) => {
     setProductos(prevProductos => prevProductos.map(producto => {
       if (producto.ID_producto === ID_producto && producto.cantidad > 1) {
-        return { ...producto, cantidad: producto.cantidad - 1 };
+        const updatedProducto = { ...producto, cantidad: producto.cantidad - 1 };
+
+        // Realizar la solicitud fetch para actualizar la cantidad del carrito de compras
+        fetch(`${baseURL}/carrito-compras/${producto.ID_carrito}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            cantidad: updatedProducto.cantidad
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Error al actualizar la cantidad del producto en el carrito de compras');
+            }
+            // Si la solicitud es exitosa, devolver el producto actualizado
+            return updatedProducto;
+          })
+          .then(updatedProducto => {
+            // Actualizar el estado local con el producto actualizado
+            setProductos(prevProductos => prevProductos.map(p => p.ID_producto === updatedProducto.ID_producto ? updatedProducto : p));
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            // Si ocurre un error, devolver el producto original sin modificar
+            return producto;
+          });
       }
       return producto;
     }));
@@ -63,11 +101,40 @@ const Carrito = () => {
   const handleIncrement = (ID_producto) => {
     setProductos(prevProductos => prevProductos.map(producto => {
       if (producto.ID_producto === ID_producto) {
-        return { ...producto, cantidad: producto.cantidad + 1 };
+        const updatedProducto = { ...producto, cantidad: producto.cantidad + 1 };
+
+        // Realizar la solicitud fetch para actualizar la cantidad del carrito de compras
+        fetch(`${baseURL}/carrito-compras/${producto.ID_carrito}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            cantidad: updatedProducto.cantidad
+          })
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Error al actualizar la cantidad del producto en el carrito de compras');
+            }
+            // Si la solicitud es exitosa, devolver el producto actualizado
+            return updatedProducto;
+          })
+          .then(updatedProducto => {
+            // Actualizar el estado local con el producto actualizado
+            setProductos(prevProductos => prevProductos.map(p => p.ID_producto === updatedProducto.ID_producto ? updatedProducto : p));
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            // Si ocurre un error, devolver el producto original sin modificar
+            return producto;
+          });
       }
       return producto;
     }));
   };
+
+
 
   const handleDeleteProduct = (ID_carrito, ID_producto) => {
     setIdItemAEliminar(ID_carrito);
@@ -119,7 +186,42 @@ const Carrito = () => {
     }
   };
 
+  const handleInputChange = (event) => {
+    setCodigoDescuento(event.target.value);
+  };
 
+  const handleDescuentoSubmit = (event) => {
+    event.preventDefault();
+    if (codigoDescuento === 'SPORT100') {
+      // Código de descuento válido
+      setDescuentoAplicado(true);
+      // Aquí puedes agregar lógica adicional para aplicar el descuento
+    } else {
+      // Código de descuento inválido
+      alert('El código de descuento ingresado no es válido.');
+    }
+  };
+
+  const calcularSubtotal = () => {
+    return productos.reduce((subtotal, producto) => subtotal + producto.precioFinal, 0);
+  };
+
+  const calcularTotal = () => {
+    let total = calcularSubtotal();
+    if (descuentoAplicado) {
+      // Aplicar descuento SPORT100 si está activado
+      total -= 100;
+    }
+    return total;
+  };
+
+  const handlePagarClick = () => {
+    navigate('/checkout', { state: { 
+      subtotal: calcularSubtotal(), 
+      descuentoAplicado, 
+      total: calcularTotal(),
+      ID_usuario: user.ID_usuario } });
+  };
   return (
     <>
 
@@ -158,7 +260,7 @@ const Carrito = () => {
                             {producto.cantidad > producto.existencias && <p style={{ color: 'red', userSelect: 'none' }}>No hay suficientes existencias</p>}
                           </div>
                         </td>
-                        <td className="shoping__cart__total" style={{ userSelect: 'none' }}>${producto.precioFinal * producto.cantidad}</td>
+                        <td className="shoping__cart__total" style={{ userSelect: 'none' }}>${(producto.precioFinal * producto.cantidad).toFixed(2)}</td>
                         <td className="shoping__cart__item__close">
                           <span className="icon_close" onClick={() => handleDeleteProduct(producto.ID_carrito, producto.ID_producto)}></span>
                         </td>
@@ -173,20 +275,21 @@ const Carrito = () => {
           <div className="row">
             <div className="col-lg-12">
               <div className="shoping__cart__btns">
-                <button className="primary-btn cart-btn" style={{ border: 'none' }}>SEGUIR COMPRANDO</button>
-                <button className="primary-btn cart-btn cart-btn-right" style={{ border: 'none' }} onClick={handleUpdateCart}>
+                <button className="primary-btn cart-btn" style={{ border: 'none' }} onClick={() => navigate('/tienda')}>SEGUIR COMPRANDO</button>
+                {/* <button className="primary-btn cart-btn cart-btn-right" style={{ border: 'none' }} onClick={handleUpdateCart}>
                   <span className="icon_loading"></span> ACTUALIZACIÓN DE LA COMPRA
-                </button>
+                </button> */}
               </div>
             </div>
             <div className="col-lg-6">
               <div className="shoping__continue">
                 <div className="shoping__discount">
                   <h5>Códigos de descuento</h5>
-                  <form action="#">
-                    <input type="text" placeholder="Ingrese su código de cupón" />
+                  <form onSubmit={handleDescuentoSubmit}>
+                    <input type="text" placeholder="Ingrese su código de cupón" value={codigoDescuento} onChange={handleInputChange} className="text-dark" />
                     <button type="submit" className="site-btn">APLICAR CUPÓN</button>
                   </form>
+                  {descuentoAplicado && <p>Descuento aplicado correctamente.</p>}
                 </div>
               </div>
             </div>
@@ -194,9 +297,11 @@ const Carrito = () => {
               <div className="shoping__checkout">
                 <h5>Total del carrito</h5>
                 <ul>
-                  {/* Aquí puedes calcular el subtotal y total del carrito */}
+                  <li>Subtotal <span>${calcularSubtotal().toFixed(2)}</span></li>
+                  {descuentoAplicado && <li>Descuento aplicado (SPORT100) <span>-$100.00</span></li>}
+                  <li>Total <span>${calcularTotal().toFixed(2)}</span></li>
                 </ul>
-                <a href="#" className="primary-btn">PAGAR</a>
+                <button style={{ border: 'none' }} className="primary-btn w-100" onClick={handlePagarClick}>PAGAR</button>
               </div>
             </div>
           </div>
