@@ -22,7 +22,7 @@ const Token = () => {
     if (event && typeof event.preventDefault === 'function') {
       event.preventDefault();
     }
-    // console.log("dataUser ", dataUser)
+    
     try {
       const response = await fetch(`${baseURL}/sendMethod`, {
         method: 'POST',
@@ -37,16 +37,18 @@ const Token = () => {
 
       const data = await response.json();
       if (!response.ok) {
-
         setAlert({ type: 'danger', message: data.msg });
         return new Error('Error al enviar el código de verificación');
       } else {
         setAlert({ type: 'success', message: 'Correo enviado con su código' });
       }
 
-
-
-      setShowTokenForm(true);
+      if (method === '2') {
+        // Navegar a la página del formulario para la pregunta secreta
+        navigate('/pregunta', { state: dataUser });
+      } else {
+        setShowTokenForm(true);
+      }
     } catch (error) {
       setAlert({ type: 'danger', message: error.msg });
     }
@@ -135,7 +137,7 @@ const Token = () => {
                               aria-label="Default select example"
                             >
                               <option value="1">Correo electrónico</option>
-                              <option value="2">SMS</option>
+                              <option value="2">Pregunta secreta</option>
                             </select>
                           </div>
                         </div>
@@ -143,7 +145,7 @@ const Token = () => {
 
 
                         <div class="col-12">
-                          <button class="btn btn-primary w-100" type="submit">Enviar código</button>
+                          <button class="btn btn-primary w-100" type="submit">Enviar</button>
                         </div>
 
                       </form>

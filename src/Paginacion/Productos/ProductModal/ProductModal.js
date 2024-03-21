@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { useNavigate } from 'react-router-dom';
-import Alert from 'react-bootstrap/Alert';
 
 const ProductModal = ({ producto, onClose }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -13,10 +12,6 @@ const ProductModal = ({ producto, onClose }) => {
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
     if (!loggedIn) {
-      setShowAlert(true); // Mostrar el alert si el usuario no está conectado
-      setTimeout(() => {
-        setShowAlert(false); // Ocultar el alert después de cierto tiempo
-      }, 3000); // 3000 milisegundos = 3 segundos
       navigate('/login'); // Redirigir al usuario a la página de inicio de sesión
     } else {
       const user = JSON.parse(localStorage.getItem('user'));
@@ -32,9 +27,6 @@ const ProductModal = ({ producto, onClose }) => {
 
   return (
     <>
-      <Alert variant="danger" show={showAlert}>
-        Necesitas iniciar sesión para ver este contenido.
-      </Alert>
       <Modal show={true} onHide={onClose}>
         <Modal.Header closeButton>
           <Modal.Title>{producto.nombre}</Modal.Title>

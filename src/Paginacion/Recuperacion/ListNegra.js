@@ -2,7 +2,7 @@ const weakPasswords = [
     "Passw0rd!",
     "Password1@",
     "Qwerty!123",
-    "Abc123!",
+    "Abcd123!",
     "P@ssword1",
     "Password12",
     "1234567!",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import $ from 'jquery';
+import Breadcrumbs from "./Breadcrumbs"; // Ajusta la ruta de importación según la ubicación del archivo Breadcrumbs
 
 const Header = () => {
 
@@ -179,6 +180,13 @@ const Header = () => {
           </div>
         </div>
       </header>
+      <div className="container">
+        <div className="row">
+          <div className="col">
+            <Breadcrumbs />
+          </div>
+        </div>
+      </div>
     </>
   );
 };

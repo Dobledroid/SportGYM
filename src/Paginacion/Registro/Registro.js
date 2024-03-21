@@ -5,6 +5,7 @@ import Footer from '../../Esquema/Footer';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import { baseURL } from '../../api.js';
 
 const Registro = () => {
   const [nombre, setNombre] = useState('');
@@ -25,6 +26,7 @@ const Registro = () => {
   const [contrasenaFuerza, setContrasenaFuerza] = useState('');
   const [mostrarConfirmarContrasena, setMostrarConfirmarContrasena] = useState(false);
   const [validacionExitosa, setValidacionExitosa] = useState(false);
+  const [aceptarTerminos, setAceptarTerminos] = useState(false);
 
   const navigate = useNavigate();
   const captcha = useRef(null);
@@ -45,7 +47,8 @@ const Registro = () => {
       contrasenaError.length === 0 &&
       contrasenaFuerza === 'Fuerte' &&
       passwordErrors.length === 0 &&
-      validarCorreoElectronico(email)
+      validarCorreoElectronico(email) // Verificar si se aceptan los términos
+
     ) {
       setValidacionExitosa(true);
     } else {
@@ -134,14 +137,16 @@ const Registro = () => {
 
   const handleRegistro = async (event) => {
     event.preventDefault();
-
+    if (!aceptarTerminos) {
+      setAlerta('Por favor acepta los términos y condiciones.');
+      return;
+    }
     if (!validacionExitosa) {
       setAlerta('Por favor completa todos los campos correctamente.');
       return;
     }
-
     try {
-      const response = await fetch('https://api-rest-sport.vercel.app/api/users123/', {
+      const response = await fetch(`${baseURL}/users/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -332,10 +337,27 @@ const Registro = () => {
                           ))}
                         </div>
                       )}
-
-                      <div className="col-12">
-                        <button className="btn btn-primary w-100" type="submit" disabled={!validacionExitosa}>Crear una cuenta</button>
+                      <div className="col-12 form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value={aceptarTerminos}
+                          id="aceptarTerminos"
+                          onChange={() => setAceptarTerminos(!aceptarTerminos)}
+                          required
+                        />
+                        <label className="form-check-label" htmlFor="aceptarTerminos">
+                          Acepto los términos y condiciones
+                        </label>
                       </div>
+                      <div className="col-12">
+                        <button
+                          className="btn btn-primary w-100"
+                          type="submit"
+                          disabled={!validacionExitosa || !aceptarTerminos}
+                        >
+                          Crear una cuenta
+                        </button>                      </div>
                       {alerta && (
                         <div className="col-12 mt-2">
                           <div className="alert alert-danger" role="alert">
@@ -345,7 +367,7 @@ const Registro = () => {
                       )}
                     </form>
                     <div className="col-12">
-                      <p className="small mb-0">¿Ya tienes una cuenta? <Link to="/login">Acceso</Link></p>
+                      <p className="small mb-0">¿Ya tienes una cuenta? <Link to="/login">Iniciar sesión </Link></p>
                     </div>
                   </div>
                 </div>

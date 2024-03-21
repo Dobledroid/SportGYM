@@ -67,7 +67,7 @@ import ProductGrid from './Productos/product-grid';
 import Carrito from './Productos/Carrito';
 import Checkout from './Productos/Checkout';
 import PruebaAbrirModal from './Productos/PruebaAbrirModal';
-
+import Pregunta from "../Paginacion/Recuperacion/Pregunta";
 // import Error from './Validaciones/Error404/Error';
 const Rutas = () => {
   return (
@@ -110,7 +110,8 @@ const Rutas = () => {
         <Route path='/recuperacion' Component={Recuperacion}></Route>
         <Route path='/validacion' Component={ Token }></Route>
         <Route path='/resetPassword' Component={ ResetPassword }></Route>
-        
+                <Route path='/pregunta' Component={Pregunta}></Route>
+
         <Route path='/AdmProductos' Component={AdmProductos}></Route>
         <Route path='/AgregarProducto' Component={AgregarProducto}></Route>
         <Route path='/EditarProducto' Component={EditarProducto}></Route>
